@@ -17,11 +17,16 @@ import datetime
 start_time = datetime.datetime.now()
 
 def getBaseUrl():
-    # url = input()
+    # url = input('请输入视频网址，形如："https://www.bilibili.com/video/av7923312/"\n')
+    # url = url.strip(' ')
     # url = 'https://www.bilibili.com/video/av7923312/'
     # url = 'https://www.bilibili.com/video/av6477644'
 
-    url = 'https://www.bilibili.com/video/av75993929'
+    # url = 'https://www.bilibili.com/video/av75993929'
+
+    # url = 'https://www.bilibili.com/video/av50267413'
+
+    url = 'https://www.bilibili.com/video/av71422418'
 
     # url_host = url.match(r'(?<=https://)(.*?)(?=/video)')
     url_host = re.search(r'https://(.*?)/video', url).group(1)
@@ -59,9 +64,9 @@ def getBaseHtml(base_url_host, base_url):
 
     html = requests.get(base_url, headers=url_header, verify=False).content.decode('utf-8')
 
-    # print('\n\n')
-    # print(html)
-    # print('\n\n')
+    print('\n\n')
+    print(html)
+    print('\n\n')
 
     return html
 
@@ -83,6 +88,8 @@ def getInfo(html):
     print(host)
 
     title = re.search(r'<title data-vue-meta="true">(.*?)_哔哩哔哩', html).group(1)
+    for ch in r'/\:*"<>|?':
+        title = title.replace(ch,'_')
     print('title')
     print(title)
 
@@ -107,6 +114,8 @@ def getM4SInfo(html):
     print(host)
 
     title = re.search(r'<title data-vue-meta="true">(.*?)_哔哩哔哩', html).group(1)
+    for ch in r'/\:*"<>|?':
+        title = title.replace(ch,'_')
     print('title')
     print(title)
 
@@ -171,7 +180,12 @@ def main():
         download(base_url, host, audio_url, audio_path)
         command = r'FFmpeg -i "' + video_path + r'" -i "' + audio_path + r'" -codec copy "' + merge_path + r'"'
         print(command)
-        os.system(command)
+        if os.system(command)==0:
+            os.system('del "' + video_path + '"')
+            os.system('del "' + audio_path + '"')
+            print('合并成功')
+        else:
+            print('合并失败')
     else:
         host, video_url, title, format = getInfo(base_html)
         download(base_url, host, video_url, title + '.' + format)
