@@ -17,8 +17,8 @@ import datetime
 start_time = datetime.datetime.now()
 
 def getBaseUrl():
-    # url = input('请输入视频网址，形如："https://www.bilibili.com/video/av7923312/"\n')
-    # url = url.strip(' ')
+    url = input('请输入视频网址，形如："https://www.bilibili.com/video/av7923312/"\n')
+    url = url.strip(' ')
     # url = 'https://www.bilibili.com/video/av7923312/'
     # url = 'https://www.bilibili.com/video/av6477644'
 
@@ -26,7 +26,7 @@ def getBaseUrl():
 
     # url = 'https://www.bilibili.com/video/av50267413'
 
-    url = 'https://www.bilibili.com/video/av71422418'
+    # url = 'https://www.bilibili.com/video/av71422418'
 
     # url_host = url.match(r'(?<=https://)(.*?)(?=/video)')
     url_host = re.search(r'https://(.*?)/video', url).group(1)
@@ -109,9 +109,13 @@ def getM4SInfo(html):
     print('audio_url')
     print(audio_url)
 
-    host = re.search(r'http://(.*?)/upgcxcode', video_url).group(1)
-    print('host')
-    print(host)
+    video_host = re.search(r'http://(.*?)/upgcxcode', video_url).group(1)
+    print('video_host')
+    print(video_host)
+
+    audio_host = re.search(r'http://(.*?)/upgcxcode', audio_url).group(1)
+    print('audio_host')
+    print(audio_host)
 
     title = re.search(r'<title data-vue-meta="true">(.*?)_哔哩哔哩', html).group(1)
     for ch in r'/\:*"<>|?':
@@ -123,7 +127,7 @@ def getM4SInfo(html):
     print('format')
     print(format)
 
-    return host, video_url, audio_url, title, format
+    return video_host, video_url, audio_host, audio_url, title, format
 
 
 def download(base_url, host, video_url, save_path):
@@ -169,15 +173,15 @@ def main():
     base_url_host, base_url = getBaseUrl()
     base_html = getBaseHtml(base_url_host, base_url)
     if checkM4S(base_html):
-        host, video_url, audio_url, title, format = getM4SInfo(base_html)
+        video_host, video_url, audio_host, audio_url, title, format = getM4SInfo(base_html)
         abspath = '\\'.join(os.path.abspath(__file__).split('\\')[0:-1]) + '\\'
         # title = '2019'
         video_path = abspath + title + 'video.' + format
         audio_path = abspath + title + 'audio.' + format
         merge_path = abspath + title + '.mp4'
         print(os.path.abspath(__file__))
-        download(base_url, host, video_url, video_path)
-        download(base_url, host, audio_url, audio_path)
+        download(base_url, video_host, video_url, video_path)
+        download(base_url, audio_host, audio_url, audio_path)
         command = r'FFmpeg -i "' + video_path + r'" -i "' + audio_path + r'" -codec copy "' + merge_path + r'"'
         print(command)
         if os.system(command)==0:
